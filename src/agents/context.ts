@@ -75,6 +75,13 @@ const loadPromise = (async () => {
     return;
   }
 
+  // Apply explicit config context windows early so callers get a stable answer even before
+  // async model discovery completes.
+  applyConfiguredContextWindows({
+    cache: MODEL_CACHE,
+    modelsConfig: cfg.models as ModelsConfig | undefined,
+  });
+
   try {
     await ensureOpenClawModelsJson(cfg);
   } catch {
@@ -98,6 +105,8 @@ const loadPromise = (async () => {
     // If model discovery fails, continue with config overrides only.
   }
 
+  // Re-apply explicit config overrides after discovery so user-provided context windows win
+  // over best-effort model discovery.
   applyConfiguredContextWindows({
     cache: MODEL_CACHE,
     modelsConfig: cfg.models as ModelsConfig | undefined,
